@@ -71,24 +71,30 @@ export function AppSidebar() {
   };
   return (
     <Sidebar>
-      <SidebarHeader className="border-b p-4">
+      <SidebarHeader className="bg-primary border-b p-4">
         <Image
-          src="images/medicare-logo.svg"
+          src="images/medicare-logo-white.svg"
           alt="Logo Medicare"
           width={136}
           height={28}
         />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-primary">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white">
+            Menu Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    className="text-white transition-colors hover:bg-white/10 hover:text-white data-[active=true]:bg-white/20 data-[active=true]:text-white"
+                  >
                     <Link href={item.url}>
-                      <item.icon />
+                      <item.icon className="text-white" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -98,7 +104,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-primary">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -107,13 +113,11 @@ export function AppSidebar() {
                   <Avatar>
                     <AvatarFallback>F</AvatarFallback>
                   </Avatar>
-                  <div>
+                  <div className="text-white">
                     <p className="text-sm">
                       {session.data?.user?.clinic?.name}
                     </p>
-                    <p className="text-muted-foreground text-sm">
-                      {session.data?.user.email}
-                    </p>
+                    <p className="text-sm">{session.data?.user.email}</p>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

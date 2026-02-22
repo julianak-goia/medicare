@@ -124,3 +124,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+.gradient-bg {
+  background: linear-gradient(135deg, #cee3fe 25%, #4f8afa 80%);
+}
+
+.bg-light {
+  /* background-color: #cee3fc; */
+  background-color: #3b8aff;
+}
