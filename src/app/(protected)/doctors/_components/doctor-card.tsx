@@ -68,13 +68,16 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Avatar className="h-10 w-10">
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <Avatar className="h-16 w-16">
             <AvatarFallback>{doctorInitials}</AvatarFallback>
           </Avatar>
-          <div>
+
+          <div className="flex flex-col items-center">
             <h3 className="text-sm font-medium">{doctor.name}</h3>
-            <p className="text-muted-foreground text-sm">{doctor.specialty}</p>
+            <p className="bg-blue-light text-primary mt-2 rounded-full px-4 py-1 text-sm font-semibold">
+              {doctor.specialty}
+            </p>
           </div>
         </div>
       </CardHeader>
@@ -95,13 +98,13 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
         </Badge>
       </CardContent>
       <Separator />
-      <CardFooter className="flex flex-col gap-2">
+      <CardFooter className="flex gap-2">
         <Dialog
           open={isUpsertDoctorDialogOpen}
           onOpenChange={setIsUpsertDoctorDialogOpen}
         >
           <DialogTrigger asChild>
-            <Button className="w-full">Ver detalhes</Button>
+            <Button className="flex-1">Ver detalhes</Button>
           </DialogTrigger>
           <UpsertDoctorForm
             doctor={{
@@ -114,9 +117,9 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
         </Dialog>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline">
               <TrashIcon />
-              Deletar médico
+              {/* Deletar médico */}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
