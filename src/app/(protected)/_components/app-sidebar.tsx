@@ -13,12 +13,6 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -107,27 +101,21 @@ export function AppSidebar() {
       <SidebarFooter className="bg-primary">
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg">
-                  <Avatar>
-                    <AvatarFallback>F</AvatarFallback>
-                  </Avatar>
-                  <div className="text-white">
-                    <p className="text-sm">
-                      {session.data?.user?.clinic?.name}
-                    </p>
-                    <p className="text-sm">{session.data?.user.email}</p>
-                  </div>
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut />
-                  Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="mb-4 flex items-center gap-2 text-white">
+              <Avatar>
+                <AvatarFallback>F</AvatarFallback>
+              </Avatar>
+              <div className="text-white">
+                <p className="text-sm">{session.data?.user?.clinic?.name}</p>
+                <p className="text-sm">{session.data?.user.email}</p>
+              </div>
+            </div>
+
+            <div className="border-t">
+              <div className="mt-4 rounded-lg p-2 text-sm text-white transition-colors hover:bg-white/10 hover:text-white">
+                <button onClick={handleSignOut}>Sair</button>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -52,7 +52,8 @@ const LoginForm = () => {
       },
       {
         onSuccess: () => {
-          router.push("/dashboard");
+          // router.push("/dashboard");
+          router.push("/doctors");
         },
         onError: () => {
           toast.error("E-mail ou senha inválidos.");
