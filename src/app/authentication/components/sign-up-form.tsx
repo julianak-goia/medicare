@@ -55,7 +55,8 @@ const SignUpForm = () => {
       },
       {
         onSuccess: () => {
-          router.push("/dashboard");
+          // router.push("/dashboard");
+          router.push("/doctors");
         },
         onError: (ctx) => {
           // console.log(ctx)
