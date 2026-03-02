@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  Building2,
   CalendarDays,
   LayoutDashboard,
-  LogOut,
   Stethoscope,
   UsersRound,
 } from "lucide-react";
@@ -46,6 +46,11 @@ const items = [
     title: "Pacientes",
     url: "/patients",
     icon: UsersRound,
+  },
+  {
+    title: "Clínicas",
+    url: "/clinics",
+    icon: Building2,
   },
 ];
 

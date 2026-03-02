@@ -24,7 +24,11 @@ const clinicFormSchema = z.object({
   name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
 });
 
-const ClinicForm = () => {
+interface ClinicFormProps {
+  onSuccess?: () => void;
+}
+
+const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
   const form = useForm<z.infer<typeof clinicFormSchema>>({
     resolver: zodResolver(clinicFormSchema),
     defaultValues: {
@@ -37,6 +41,8 @@ const ClinicForm = () => {
       await createClinic(data.name);
     } catch (error) {
       if (isRedirectError(error)) {
+        toast.success("Clínica criada com sucesso.");
+        onSuccess?.();
         return;
       }
       console.error(error);
