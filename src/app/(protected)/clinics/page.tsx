@@ -16,6 +16,7 @@ import { usersToClinicsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import AddClinicButton from "./_components/add-clinic-button";
+import ClinicTableRow from "./_components/clinic-table-row";
 
 const ClinicsPage = async () => {
   const session = await auth.api.getSession({
@@ -56,13 +57,16 @@ const ClinicsPage = async () => {
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">
                   Data de criação
                 </th>
+                <th className="text-muted-foreground px-4 py-3 text-right font-medium">
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
               {userClinics.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={2}
+                    colSpan={3}
                     className="text-muted-foreground px-4 py-8 text-center"
                   >
                     Nenhuma clínica encontrada.
@@ -70,19 +74,7 @@ const ClinicsPage = async () => {
                 </tr>
               ) : (
                 userClinics.map(({ clinic }) => (
-                  <tr
-                    key={clinic.id}
-                    className="hover:bg-muted/30 border-b transition-colors last:border-b-0"
-                  >
-                    <td className="px-4 py-3 font-medium">{clinic.name}</td>
-                    <td className="text-muted-foreground px-4 py-3">
-                      {new Intl.DateTimeFormat("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }).format(new Date(clinic.createdAt))}
-                    </td>
-                  </tr>
+                  <ClinicTableRow key={clinic.id} clinic={clinic} />
                 ))
               )}
             </tbody>
