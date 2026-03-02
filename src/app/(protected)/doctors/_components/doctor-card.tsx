@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { doctorsTable } from "@/db/schema";
+import { clinicsTable, doctorsTable } from "@/db/schema";
 import { formatCurrencyInCents } from "@/helpers/currency";
 
 import { getAvailability } from "../_helpers/availability";
@@ -41,9 +41,11 @@ import UpsertDoctorForm from "./upsert-doctor-form";
 
 interface DoctorCardProps {
   doctor: typeof doctorsTable.$inferSelect;
+  clinics: (typeof clinicsTable.$inferSelect)[];
+  doctorClinicIds: string[];
 }
 
-const DoctorCard = ({ doctor }: DoctorCardProps) => {
+const DoctorCard = ({ doctor, clinics, doctorClinicIds }: DoctorCardProps) => {
   const [isUpsertDoctorDialogOpen, setIsUpsertDoctorDialogOpen] =
     useState(false);
   const deleteDoctorAction = useAction(deleteDoctor, {
@@ -112,6 +114,8 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
               availableFromTime: availability.from.format("HH:mm:ss"),
               availableToTime: availability.to.format("HH:mm:ss"),
             }}
+            clinics={clinics}
+            doctorClinicIds={doctorClinicIds}
             onSuccess={() => setIsUpsertDoctorDialogOpen(false)}
           />
         </Dialog>

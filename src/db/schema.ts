@@ -4,6 +4,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   time,
   timestamp,
@@ -105,6 +106,7 @@ export const clinicsTableRelations = relations(clinicsTable, ({ many }) => ({
   patients: many(patientsTable),
   appointments: many(appointmentsTable),
   usersToClinics: many(usersToClinicsTable),
+  doctorsToClinics: many(doctorsToClinicsTable),
 }));
 
 export const doctorsTable = pgTable("doctors", {
@@ -135,6 +137,34 @@ export const doctorsTableRelations = relations(
       references: [clinicsTable.id],
     }),
     appointments: many(appointmentsTable),
+    doctorsToClinics: many(doctorsToClinicsTable),
+  }),
+);
+
+export const doctorsToClinicsTable = pgTable(
+  "doctors_to_clinics",
+  {
+    doctorId: uuid("doctor_id")
+      .notNull()
+      .references(() => doctorsTable.id, { onDelete: "cascade" }),
+    clinicId: uuid("clinic_id")
+      .notNull()
+      .references(() => clinicsTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.doctorId, t.clinicId] })],
+);
+
+export const doctorsToClinicsTableRelations = relations(
+  doctorsToClinicsTable,
+  ({ one }) => ({
+    doctor: one(doctorsTable, {
+      fields: [doctorsToClinicsTable.doctorId],
+      references: [doctorsTable.id],
+    }),
+    clinic: one(clinicsTable, {
+      fields: [doctorsToClinicsTable.clinicId],
+      references: [clinicsTable.id],
+    }),
   }),
 );
 

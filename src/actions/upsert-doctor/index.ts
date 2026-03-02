@@ -2,11 +2,12 @@
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { db } from "@/db";
-import { doctorsTable } from "@/db/schema";
+import { doctorsToClinicsTable, doctorsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
 
@@ -60,6 +61,27 @@ export const upsertDoctor = actionClient
           availableToTime: availableToTimeUTC.format("HH:mm:ss"),
         },
       });
+
+    // Get the doctor id (either existing or newly created)
+    const doctorId =
+      parsedInput.id ??
+      (await db.query.doctorsTable.findFirst({
+        where: eq(doctorsTable.clinicId, session.user.clinic.id),
+        orderBy: (t, { desc }) => [desc(t.createdAt)],
+        columns: { id: true },
+      }))!.id;
+
+    // Sync doctors_to_clinics junction table
+    await db
+      .delete(doctorsToClinicsTable)
+      .where(eq(doctorsToClinicsTable.doctorId, doctorId));
+    await db.insert(doctorsToClinicsTable).values(
+      parsedInput.clinicIds.map((clinicId) => ({
+        doctorId,
+        clinicId,
+      })),
+    );
+
     //atualiza a pagina /doctors
     revalidatePath("/doctors");
   });

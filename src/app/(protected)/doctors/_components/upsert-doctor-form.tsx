@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { doctorsTable } from "@/db/schema";
+import { clinicsTable, doctorsTable } from "@/db/schema";
 
 import { medicalSpecialties } from "../_constants";
 
@@ -55,6 +55,9 @@ const formSchema = z
     availableToTime: z.string().min(1, {
       message: "Hora de término é obrigatória.",
     }),
+    clinicIds: z
+      .array(z.string().uuid())
+      .min(1, { message: "Selecione ao menos uma clínica." }),
   })
   .refine(
     (data) => {
@@ -69,10 +72,17 @@ const formSchema = z
 
 interface UpsertDoctorFormProps {
   doctor?: typeof doctorsTable.$inferSelect;
+  clinics: (typeof clinicsTable.$inferSelect)[];
+  doctorClinicIds?: string[];
   onSuccess?: () => void;
 }
 
-const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({
+  doctor,
+  clinics,
+  doctorClinicIds,
+  onSuccess,
+}: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -86,6 +96,7 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
       availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
       availableFromTime: doctor?.availableFromTime ?? "",
       availableToTime: doctor?.availableToTime ?? "",
+      clinicIds: doctorClinicIds ?? [],
     },
   });
   const upsertDoctorAction = useAction(upsertDoctor, {
@@ -109,7 +120,7 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
   };
 
   return (
-    <DialogContent>
+    <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{doctor ? doctor.name : "Adicionar médico"}</DialogTitle>
         <DialogDescription>
@@ -180,6 +191,57 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
                   customInput={Input}
                   prefix="R$"
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Clínicas */}
+          <FormField
+            control={form.control}
+            name="clinicIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Clínicas</FormLabel>
+                <div className="max-h-36 overflow-y-auto rounded-md border p-3">
+                  {clinics.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      Nenhuma clínica disponível.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {clinics.map((clinic) => (
+                        <div
+                          key={clinic.id}
+                          className="flex items-center gap-2"
+                        >
+                          <input
+                            id={`clinic-${clinic.id}`}
+                            type="checkbox"
+                            className="accent-primary h-4 w-4 cursor-pointer"
+                            checked={field.value?.includes(clinic.id)}
+                            onChange={(e) => {
+                              const current = field.value ?? [];
+                              if (e.target.checked) {
+                                field.onChange([...current, clinic.id]);
+                              } else {
+                                field.onChange(
+                                  current.filter((id) => id !== clinic.id),
+                                );
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`clinic-${clinic.id}`}
+                            className="cursor-pointer text-sm font-normal"
+                          >
+                            {clinic.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <FormMessage />
               </FormItem>
             )}

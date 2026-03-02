@@ -5,10 +5,15 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { clinicsTable } from "@/db/schema";
 
 import UpsertDoctorForm from "./upsert-doctor-form";
 
-const AddDoctorButton = () => {
+interface AddDoctorButtonProps {
+  clinics: (typeof clinicsTable.$inferSelect)[];
+}
+
+const AddDoctorButton = ({ clinics }: AddDoctorButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -18,7 +23,7 @@ const AddDoctorButton = () => {
           Adicionar médico
         </Button>
       </DialogTrigger>
-      <UpsertDoctorForm onSuccess={() => setIsOpen(false)} />
+      <UpsertDoctorForm clinics={clinics} onSuccess={() => setIsOpen(false)} />
     </Dialog>
   );
 };

@@ -22,6 +22,9 @@ export const upsertDoctorSchema = z
     availableToTime: z.string().min(1, {
       message: "Hora de término é obrigatória.",
     }),
+    clinicIds: z
+      .array(z.string().uuid())
+      .min(1, { message: "Selecione ao menos uma clínica." }),
   })
   .refine(
     (data) => {

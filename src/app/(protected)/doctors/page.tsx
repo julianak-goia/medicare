@@ -12,7 +12,7 @@ import {
   PageTitle,
 } from "@/components/ui/page-container";
 import { db } from "@/db";
-import { doctorsTable } from "@/db/schema";
+import { doctorsTable, usersToClinicsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import AddDoctorButton from "./_components/add-doctor-button";
@@ -28,9 +28,23 @@ const DoctorsPage = async () => {
   if (!session.user.clinic) {
     redirect("/clinic-form");
   }
-  const doctors = await db.query.doctorsTable.findMany({
-    where: eq(doctorsTable.clinicId, session.user.clinic.id),
-  });
+
+  const [doctors, userClinics] = await Promise.all([
+    db.query.doctorsTable.findMany({
+      where: eq(doctorsTable.clinicId, session.user.clinic.id),
+      with: {
+        doctorsToClinics: {
+          with: { clinic: true },
+        },
+      },
+    }),
+    db.query.usersToClinicsTable.findMany({
+      where: eq(usersToClinicsTable.userId, session.user.id),
+      with: { clinic: true },
+    }),
+  ]);
+
+  const clinics = userClinics.map(({ clinic }) => clinic);
 
   return (
     <PageContainer>
@@ -40,13 +54,20 @@ const DoctorsPage = async () => {
           <PageDescription>Gerencie os médicos da sua clínica</PageDescription>
         </PageHeaderContent>
         <PageActions>
-          <AddDoctorButton />
+          <AddDoctorButton clinics={clinics} />
         </PageActions>
       </PageHeader>
       <PageContent>
         <div className="grid grid-cols-4 gap-6">
           {doctors.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} />
+            <DoctorCard
+              key={doctor.id}
+              doctor={doctor}
+              clinics={clinics}
+              doctorClinicIds={doctor.doctorsToClinics.map(
+                (dtc) => dtc.clinicId,
+              )}
+            />
           ))}
         </div>
       </PageContent>
