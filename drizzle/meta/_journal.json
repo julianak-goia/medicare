@@ -8,6 +8,20 @@
       "when": 1772412917613,
       "tag": "0000_add_doctors_to_clinics",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772586710576,
+      "tag": "0001_majestic_mimic",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772586982455,
+      "tag": "0002_spooky_wiccan",
+      "breakpoints": true
     }
   ]
 }
