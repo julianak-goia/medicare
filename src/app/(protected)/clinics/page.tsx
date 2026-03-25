@@ -55,6 +55,9 @@ const ClinicsPage = async () => {
                   Nome
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">
+                  Tipo
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">
                   Data de criação
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-right font-medium">
@@ -66,7 +69,7 @@ const ClinicsPage = async () => {
               {userClinics.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="text-muted-foreground px-4 py-8 text-center"
                   >
                     Nenhuma clínica encontrada.
