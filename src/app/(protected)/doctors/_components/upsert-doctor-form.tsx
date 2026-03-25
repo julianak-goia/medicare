@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -203,45 +204,17 @@ const UpsertDoctorForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Clínicas</FormLabel>
-                <div className="max-h-36 overflow-y-auto rounded-md border p-3">
-                  {clinics.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">
-                      Nenhuma clínica disponível.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {clinics.map((clinic) => (
-                        <div
-                          key={clinic.id}
-                          className="flex items-center gap-2"
-                        >
-                          <input
-                            id={`clinic-${clinic.id}`}
-                            type="checkbox"
-                            className="accent-primary h-4 w-4 cursor-pointer"
-                            checked={field.value?.includes(clinic.id)}
-                            onChange={(e) => {
-                              const current = field.value ?? [];
-                              if (e.target.checked) {
-                                field.onChange([...current, clinic.id]);
-                              } else {
-                                field.onChange(
-                                  current.filter((id) => id !== clinic.id),
-                                );
-                              }
-                            }}
-                          />
-                          <label
-                            htmlFor={`clinic-${clinic.id}`}
-                            className="cursor-pointer text-sm font-normal"
-                          >
-                            {clinic.name}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <FormControl>
+                  <MultiSelect
+                    options={clinics.map((clinic) => ({
+                      label: clinic.name,
+                      value: clinic.id,
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione uma ou mais clínicas"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
