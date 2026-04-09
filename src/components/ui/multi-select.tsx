@@ -11,7 +11,7 @@ export interface Option {
 
 interface MultiSelectProps {
   options: Option[];
-  value: string[];
+  value?: string[];
   onChange: (value: string[]) => void;
   placeholder?: string;
   className?: string;
@@ -29,26 +29,62 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const selectedValues = value ?? [];
+
+    React.useEffect(() => {
+      const handleOutsideClick = (event: MouseEvent) => {
+        if (!containerRef.current) {
+          return;
+        }
+
+        const target = event.target as Node;
+        if (!containerRef.current.contains(target)) {
+          setOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, []);
+
+    const setRefs = (node: HTMLDivElement | null) => {
+      containerRef.current = node;
+      if (!ref) {
+        return;
+      }
+
+      if (typeof ref === "function") {
+        ref(node);
+      } else {
+        ref.current = node;
+      }
+    };
 
     const handleSelect = (optionValue: string) => {
-      if (value.includes(optionValue)) {
-        onChange(value.filter((item) => item !== optionValue));
+      if (selectedValues.includes(optionValue)) {
+        onChange(selectedValues.filter((item) => item !== optionValue));
       } else {
-        onChange([...value, optionValue]);
+        onChange([...selectedValues, optionValue]);
       }
     };
 
     const handleRemove = (optionValue: string, e: React.MouseEvent) => {
       e.stopPropagation();
-      onChange(value.filter((item) => item !== optionValue));
+      onChange(selectedValues.filter((item) => item !== optionValue));
     };
 
-    const selectedLabels = options
-      .filter((opt) => value.includes(opt.value))
-      .map((opt) => opt.label);
+    const selectedOptions = options.filter((opt) =>
+      selectedValues.includes(opt.value),
+    );
+    const availableOptions = options.filter(
+      (opt) => !selectedValues.includes(opt.value),
+    );
 
     return (
-      <div ref={ref} className={cn("relative w-full", className)}>
+      <div ref={setRefs} className={cn("relative w-full", className)}>
         <div
           onClick={() => setOpen(!open)}
           className={cn(
@@ -56,22 +92,17 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
             open && "ring-ring ring-1",
           )}
         >
-          {value.length === 0 ? (
+          {selectedValues.length === 0 ? (
             <span className="text-muted-foreground text-sm">{placeholder}</span>
           ) : (
-            selectedLabels.map((label, idx) => (
-              <Badge key={`${label}-${idx}`} variant="secondary">
-                {label}
+            selectedOptions.map((option) => (
+              <div key={option.value} className="flex items-center">
+                <Badge variant="secondary">{option.label}</Badge>
                 <X
                   className="ml-1 h-3 w-3 cursor-pointer"
-                  onClick={(e) => {
-                    handleRemove(
-                      options.find((opt) => opt.label === label)?.value || "",
-                      e,
-                    );
-                  }}
+                  onClick={(e) => handleRemove(option.value, e)}
                 />
-              </Badge>
+              </div>
             ))
           )}
         </div>
@@ -79,13 +110,13 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
         {open && (
           <div className="border-input bg-background absolute top-full right-0 left-0 z-50 mt-1 rounded-md border shadow-md">
             <div className="max-h-48 overflow-y-auto p-2">
-              {options.length === 0 ? (
+              {availableOptions.length === 0 ? (
                 <p className="text-muted-foreground p-2 text-sm">
                   Nenhuma opção disponível.
                 </p>
               ) : (
                 <div className="space-y-1">
-                  {options.map((option) => (
+                  {availableOptions.map((option) => (
                     <div
                       key={option.value}
                       onClick={() => handleSelect(option.value)}

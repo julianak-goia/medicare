@@ -134,59 +134,61 @@ const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de clínica</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione um tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectGroup>
-                      {clinicTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de clínica</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione um tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        {clinicTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="nature"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Natureza</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a natureza" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectGroup>
-                      {clinicNatures.map((nature) => (
-                        <SelectItem key={nature.value} value={nature.value}>
-                          {nature.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="nature"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Natureza</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione a natureza" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        {clinicNatures.map((nature) => (
+                          <SelectItem key={nature.value} value={nature.value}>
+                            {nature.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
@@ -197,7 +199,7 @@ const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
                 <FormControl>
                   <MultiSelect
                     options={medicalSpecialties}
-                    value={field.value}
+                    value={field.value ?? []}
                     onChange={field.onChange}
                     placeholder="Selecione um ou mais serviços"
                   />
@@ -216,7 +218,7 @@ const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
                 <FormControl>
                   <MultiSelect
                     options={clinicInsurancePlans}
-                    value={field.value}
+                    value={field.value ?? []}
                     onChange={field.onChange}
                     placeholder="Selecione um ou mais convênios"
                   />

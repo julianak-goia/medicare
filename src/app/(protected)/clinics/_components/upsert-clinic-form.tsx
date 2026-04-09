@@ -240,7 +240,7 @@ const UpsertClinicForm = ({ clinic, onSuccess }: UpsertClinicFormProps) => {
                 <FormControl>
                   <MultiSelect
                     options={medicalSpecialties}
-                    value={field.value}
+                    value={field.value ?? []}
                     onChange={field.onChange}
                     placeholder="Selecione um ou mais serviços"
                   />
@@ -259,7 +259,7 @@ const UpsertClinicForm = ({ clinic, onSuccess }: UpsertClinicFormProps) => {
                 <FormControl>
                   <MultiSelect
                     options={clinicInsurancePlans}
-                    value={field.value}
+                    value={field.value ?? []}
                     onChange={field.onChange}
                     placeholder="Selecione um ou mais convênios"
                   />
