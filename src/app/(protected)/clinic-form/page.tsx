@@ -11,7 +11,12 @@ const ClinicFormPage = () => {
   return (
     <div>
       <Dialog open={true}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent
+          contentWidth="60vw"
+          contentHeight="80vh"
+          contentMaxWidth="60vw"
+          className="overflow-y-auto"
+        >
           <DialogHeader>
             <DialogTitle>Adicionar clínica</DialogTitle>
             <DialogDescription>
