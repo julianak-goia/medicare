@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -39,7 +40,12 @@ import {
 } from "@/components/ui/select";
 import { clinicsTable } from "@/db/schema";
 
-import { clinicTypes } from "../_constants";
+import { medicalSpecialties } from "../../doctors/_constants";
+import {
+  clinicInsurancePlans,
+  clinicNatures,
+  clinicTypes,
+} from "../_constants";
 import {
   type AddressData,
   fetchAddressByZipCode,
@@ -61,6 +67,10 @@ const UpsertClinicForm = ({ clinic, onSuccess }: UpsertClinicFormProps) => {
       id: clinic?.id,
       name: clinic?.name ?? "",
       type: clinic?.type ?? "",
+      nature:
+        (clinic?.nature as "Público" | "Privado" | undefined) ?? undefined,
+      services: clinic?.services ?? [],
+      acceptedInsurancePlans: clinic?.acceptedInsurancePlans ?? [],
       phone: clinic?.phone ?? "",
       email: clinic?.email ?? "",
       zipCode: clinic?.zipCode ?? "",
@@ -76,6 +86,10 @@ const UpsertClinicForm = ({ clinic, onSuccess }: UpsertClinicFormProps) => {
       id: clinic?.id,
       name: clinic?.name ?? "",
       type: clinic?.type ?? "",
+      nature:
+        (clinic?.nature as "Público" | "Privado" | undefined) ?? undefined,
+      services: clinic?.services ?? [],
+      acceptedInsurancePlans: clinic?.acceptedInsurancePlans ?? [],
       phone: clinic?.phone ?? "",
       email: clinic?.email ?? "",
       zipCode: clinic?.zipCode ?? "",
@@ -185,6 +199,71 @@ const UpsertClinicForm = ({ clinic, onSuccess }: UpsertClinicFormProps) => {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="nature"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Natureza</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a natureza" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      {clinicNatures.map((nature) => (
+                        <SelectItem key={nature.value} value={nature.value}>
+                          {nature.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="services"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Serviços</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={medicalSpecialties}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione um ou mais serviços"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="acceptedInsurancePlans"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Convênios aceitos</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={clinicInsurancePlans}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione um ou mais convênios"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

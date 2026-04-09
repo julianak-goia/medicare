@@ -40,6 +40,9 @@ export const upsertClinic = actionClient
         .set({
           name: parsedInput.name,
           type: parsedInput.type,
+          nature: parsedInput.nature,
+          services: parsedInput.services,
+          acceptedInsurancePlans: parsedInput.acceptedInsurancePlans,
           phone: parsedInput.phone,
           email: parsedInput.email,
           zipCode: parsedInput.zipCode,
@@ -56,6 +59,9 @@ export const upsertClinic = actionClient
         .values({
           name: parsedInput.name,
           type: parsedInput.type,
+          nature: parsedInput.nature,
+          services: parsedInput.services,
+          acceptedInsurancePlans: parsedInput.acceptedInsurancePlans,
           phone: parsedInput.phone,
           email: parsedInput.email,
           zipCode: parsedInput.zipCode,

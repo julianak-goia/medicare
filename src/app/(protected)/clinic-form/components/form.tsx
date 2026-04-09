@@ -6,7 +6,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { upsertClinic } from "@/actions/upsert-clinic";
 import {
@@ -24,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
   SelectContent,
@@ -33,13 +33,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { clinicTypes } from "../../clinics/_constants";
+import {
+  clinicInsurancePlans,
+  clinicNatures,
+  clinicTypes,
+} from "../../clinics/_constants";
 import {
   type AddressData,
   fetchAddressByZipCode,
   formatPhone,
   formatZipCode,
 } from "../../clinics/_helpers/zip-code";
+import { medicalSpecialties } from "../../doctors/_constants";
 
 interface ClinicFormProps {
   onSuccess?: () => void;
@@ -53,6 +58,9 @@ const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
     defaultValues: {
       name: "",
       type: "",
+      nature: undefined,
+      services: [],
+      acceptedInsurancePlans: [],
       phone: "",
       email: "",
       zipCode: "",
@@ -148,6 +156,71 @@ const ClinicForm = ({ onSuccess }: ClinicFormProps) => {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="nature"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Natureza</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a natureza" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      {clinicNatures.map((nature) => (
+                        <SelectItem key={nature.value} value={nature.value}>
+                          {nature.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="services"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Serviços</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={medicalSpecialties}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione um ou mais serviços"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="acceptedInsurancePlans"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Convênios aceitos</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={clinicInsurancePlans}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Selecione um ou mais convênios"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
