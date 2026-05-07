@@ -7,10 +7,6 @@ import { z } from "zod";
 
 import { upsertPatient } from "@/actions/upsert-patient";
 import { upsertPatientSchema } from "@/actions/upsert-patient/schema";
-import {dressByZipCode,
-  formatCpf,
-} from "../../clinics/_helpers/zip-code";
-import { clinicInsurancePlans } from "../../clinics/_constants/clinic-insurance-plans";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -31,14 +27,18 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-
-import { clinicInsurancePlans } from "../../clinics/_constants/clinic-insurance-plans";
-import { fetchAddressByZipCode, formatCpf,formatZipCode } from "../../clinics/_helpers/zip-code";  SelectItem,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
-import { formatPhone } from "../../clinics/_helpers/zip-code";
+import { clinicInsurancePlans } from "../../clinics/_constants/clinic-insurance-plans";
+import {
+  fetchAddressByZipCode,
+  formatCpf,
+  formatPhone,
+  formatZipCode,
+} from "../../clinics/_helpers/zip-code";
 
 const formSchema = z
   .object({
