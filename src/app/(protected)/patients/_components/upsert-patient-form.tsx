@@ -1,12 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { upsertPatient } from "@/actions/upsert-patient";
 import { upsertPatientSchema } from "@/actions/upsert-patient/schema";
+import {dressByZipCode,
+  formatCpf,
+} from "../../clinics/_helpers/zip-code";
+import { clinicInsurancePlans } from "../../clinics/_constants/clinic-insurance-plans";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -27,7 +31,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectItem,
+
+import { clinicInsurancePlans } from "../../clinics/_constants/clinic-insurance-plans";
+import { fetchAddressByZipCode, formatCpf,formatZipCode } from "../../clinics/_helpers/zip-code";  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -61,6 +67,15 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
       phoneNumber: patient?.phoneNumber ?? "",
       sex: patient?.sex ?? "male",
       id: patient?.id,
+      cpf: patient?.cpf ?? "",
+      birthDate: patient?.birthDate ? patient.birthDate.slice(0, 10) : "",
+      zipCode: patient?.zipCode ?? "",
+      address: patient?.address ?? "",
+      number: patient?.number ?? "",
+      city: patient?.city ?? "",
+      state: patient?.state ?? "",
+      bloodType: patient?.bloodType ?? "",
+      insurance: patient?.insurance ?? "",
     },
   });
 
@@ -72,13 +87,50 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
     [form],
   );
 
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+
+  const handleZipCodeChange = useCallback(
+    (value: string) => {
+      const formatted = formatZipCode(value);
+      form.setValue("zipCode", formatted);
+
+      if (formatted.replace(/\D/g, "").length === 8) {
+        setIsLoadingAddress(true);
+        fetchAddressByZipCode(formatted)
+          .then((addressData) => {
+            if (addressData) {
+              form.setValue("address", addressData.address);
+              form.setValue("city", addressData.city);
+              form.setValue("state", addressData.state);
+            }
+          })
+          .finally(() => setIsLoadingAddress(false));
+      }
+    },
+    [form],
+  );
+
+  const handleCpfChange = useCallback(
+    (value: string) => {
+      const formatted = formatCpf(value);
+      form.setValue("cpf", formatted);
+    },
+    [form],
+  );
+
   const upsertPatientAction = useAction(upsertPatient, {
     onSuccess: () => {
-      toast.success("Paciente adicionado com sucesso.");
+      toast.success(
+        patient
+          ? "Paciente atualizado com sucesso."
+          : "Paciente adicionado com sucesso.",
+      );
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Erro ao adicionar paciente.");
+      toast.error(
+        patient ? "Erro ao atualizar paciente." : "Erro ao adicionar paciente.",
+      );
     },
   });
 
@@ -130,6 +182,71 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
 
           <FormField
             control={form.control}
+            name="cpf"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CPF</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="000.000.000-00"
+                    onChange={(e) => handleCpfChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="birthDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data de nascimento</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="bloodType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo sanguíneo</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A+">A+</SelectItem>
+                        <SelectItem value="A-">A-</SelectItem>
+                        <SelectItem value="B+">B+</SelectItem>
+                        <SelectItem value="B-">B-</SelectItem>
+                        <SelectItem value="AB+">AB+</SelectItem>
+                        <SelectItem value="AB-">AB-</SelectItem>
+                        <SelectItem value="O+">O+</SelectItem>
+                        <SelectItem value="O-">O-</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
             name="phoneNumber"
             render={({ field }) => (
               <FormItem>
@@ -140,6 +257,113 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
                     placeholder="(00) 00000-0000"
                     onChange={(e) => handlePhoneChange(e.target.value)}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="zipCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CEP</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="00000-000"
+                      onChange={(e) => handleZipCodeChange(e.target.value)}
+                      disabled={isLoadingAddress}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Endereço</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <FormControl>
+                    <Input {...field} maxLength={2} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="insurance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Convênio</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clinicInsurancePlans.map((plan) => (
+                        <SelectItem key={plan.value} value={plan.value}>
+                          {plan.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
