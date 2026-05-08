@@ -50,7 +50,11 @@ const formSchema = z
       .min(1, { message: "Telefone é obrigatório." }),
     sex: z.enum(["male", "female"]),
   })
-  .merge(upsertPatientSchema.partial().pick({ id: true }));
+  .merge(
+    upsertPatientSchema
+      .partial()
+      .omit({ name: true, email: true, phoneNumber: true, sex: true }),
+  );
 
 interface UpsertPatientFormProps {
   patient?: any;
@@ -68,7 +72,11 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
       sex: patient?.sex ?? "male",
       id: patient?.id,
       cpf: patient?.cpf ?? "",
-      birthDate: patient?.birthDate ? patient.birthDate.slice(0, 10) : "",
+      birthDate: patient?.birthDate
+        ? typeof patient.birthDate === "string"
+          ? patient.birthDate.slice(0, 10)
+          : patient.birthDate.toISOString().slice(0, 10)
+        : "",
       zipCode: patient?.zipCode ?? "",
       address: patient?.address ?? "",
       number: patient?.number ?? "",

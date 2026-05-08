@@ -7,7 +7,7 @@ export const upsertPatientSchema = z.object({
   phoneNumber: z.string().trim().min(1, { message: "Telefone é obrigatório." }),
   sex: z.enum(["male", "female"]),
   cpf: z.string().optional(),
-  birthDate: z.string().optional(),
+  birthDate: z.string().optional(), // ISO format string from <input type="date" />
   zipCode: z.string().optional(),
   address: z.string().optional(),
   number: z.string().optional(),
