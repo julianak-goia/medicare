@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,21 +41,22 @@ import {
   formatZipCode,
 } from "../../clinics/_helpers/zip-code";
 
-const formSchema = z
-  .object({
-    name: z.string().trim().min(1, { message: "Nome é obrigatório." }),
-    email: z.string().email({ message: "Email inválido." }),
-    phoneNumber: z
-      .string()
-      .trim()
-      .min(1, { message: "Telefone é obrigatório." }),
-    sex: z.enum(["male", "female"]),
-  })
-  .merge(
-    upsertPatientSchema
-      .partial()
-      .omit({ name: true, email: true, phoneNumber: true, sex: true }),
-  );
+const formSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(1, { message: "Nome é obrigatório." }),
+  email: z.string().email({ message: "Email inválido." }),
+  phoneNumber: z.string().trim().min(1, { message: "Telefone é obrigatório." }),
+  sex: z.enum(["male", "female"]),
+  cpf: z.string().optional(),
+  birthDate: z.string().optional(),
+  zipCode: z.string().optional(),
+  address: z.string().optional(),
+  number: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  bloodType: z.string().optional(),
+  insurance: z.string().optional(),
+});
 
 interface UpsertPatientFormProps {
   patient?: any;
@@ -63,7 +65,7 @@ interface UpsertPatientFormProps {
 
 const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
-    shouldUnregister: true,
+    shouldUnregister: false,
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: patient?.name ?? "",
@@ -86,6 +88,29 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
       insurance: patient?.insurance ?? "",
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      name: patient?.name ?? "",
+      email: patient?.email ?? "",
+      phoneNumber: patient?.phoneNumber ?? "",
+      sex: patient?.sex ?? "male",
+      id: patient?.id,
+      cpf: patient?.cpf ?? "",
+      birthDate: patient?.birthDate
+        ? typeof patient.birthDate === "string"
+          ? patient.birthDate.slice(0, 10)
+          : patient.birthDate.toISOString().slice(0, 10)
+        : "",
+      zipCode: patient?.zipCode ?? "",
+      address: patient?.address ?? "",
+      number: patient?.number ?? "",
+      city: patient?.city ?? "",
+      state: patient?.state ?? "",
+      bloodType: patient?.bloodType ?? "",
+      insurance: patient?.insurance ?? "",
+    });
+  }, [form, patient]);
 
   const handlePhoneChange = useCallback(
     (value: string) => {
@@ -143,7 +168,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    upsertPatientAction.execute({ ...values, id: values.id });
+    upsertPatientAction.execute(values);
   };
 
   return (
@@ -228,10 +253,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
                 <FormItem>
                   <FormLabel>Tipo sanguíneo</FormLabel>
                   <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -357,10 +379,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
               <FormItem>
                 <FormLabel>Convênio</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -385,10 +404,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
               <FormItem>
                 <FormLabel>Sexo</FormLabel>
                 <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>

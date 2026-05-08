@@ -15,7 +15,10 @@ import { upsertPatientSchema } from "./schema";
 // Helper function to process patient data before database operation
 function processPatientData(input: z.infer<typeof upsertPatientSchema>) {
   return {
-    id: input.id,
+    id:
+      input.id && typeof input.id === "string" && input.id.trim()
+        ? input.id
+        : undefined,
     name: input.name,
     email: input.email,
     phoneNumber: input.phoneNumber,
@@ -48,17 +51,26 @@ export const upsertPatient = actionClient
     }
 
     const processedData = processPatientData(parsedInput);
-
-    await db
-      .insert(patientsTable)
-      .values({
+    // Temporary debug log to verify incoming payload
+    // Remove or comment out in production
+    console.log("upsertPatient parsedInput:", parsedInput);
+    // If an id is provided, perform an update to avoid creating a new record.
+    if (processedData.id) {
+      const updateData = { ...processedData } as Record<string, any>;
+      delete updateData.id;
+      await db
+        .update(patientsTable)
+        .set({
+          ...updateData,
+          clinicId: session.user.clinic.id,
+        })
+        .where(eq(patientsTable.id, processedData.id));
+    } else {
+      await db.insert(patientsTable).values({
         ...processedData,
         clinicId: session.user.clinic.id,
-      })
-      .onConflictDoUpdate({
-        target: [patientsTable.id],
-        set: processedData,
       });
+    }
 
     revalidatePath("/patients");
   });
