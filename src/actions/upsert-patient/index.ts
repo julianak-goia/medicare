@@ -15,25 +15,20 @@ import { upsertPatientSchema } from "./schema";
 // Helper function to process patient data before database operation
 function processPatientData(input: z.infer<typeof upsertPatientSchema>) {
   return {
-    id:
-      input.id && typeof input.id === "string" && input.id.trim()
-        ? input.id
-        : undefined,
+    id: input.id ?? undefined,
     name: input.name,
     email: input.email,
     phoneNumber: input.phoneNumber,
     sex: input.sex,
-    cpf: input.cpf && input.cpf.trim() ? input.cpf : null,
-    birthDate: input.birthDate ? new Date(input.birthDate) : null,
-    zipCode: input.zipCode && input.zipCode.trim() ? input.zipCode : null,
-    address: input.address && input.address.trim() ? input.address : null,
-    number: input.number && input.number.trim() ? input.number : null,
-    city: input.city && input.city.trim() ? input.city : null,
-    state: input.state && input.state.trim() ? input.state : null,
-    bloodType:
-      input.bloodType && input.bloodType.trim() ? input.bloodType : null,
-    insurance:
-      input.insurance && input.insurance.trim() ? input.insurance : null,
+    cpf: input.cpf,
+    birthDate: new Date(input.birthDate),
+    zipCode: input.zipCode,
+    address: input.address,
+    number: input.number,
+    city: input.city,
+    state: input.state,
+    bloodType: input.bloodType,
+    insurance: input.insurance,
   };
 }
 

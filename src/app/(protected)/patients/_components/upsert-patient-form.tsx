@@ -46,16 +46,19 @@ const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Nome é obrigatório." }),
   email: z.string().email({ message: "Email inválido." }),
   phoneNumber: z.string().trim().min(1, { message: "Telefone é obrigatório." }),
-  sex: z.enum(["male", "female"]),
-  cpf: z.string().optional(),
-  birthDate: z.string().optional(),
-  zipCode: z.string().optional(),
-  address: z.string().optional(),
-  number: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  bloodType: z.string().optional(),
-  insurance: z.string().optional(),
+  sex: z.enum(["male", "female"], { message: "Sexo é obrigatório." }),
+  cpf: z.string().trim().min(1, { message: "CPF é obrigatório." }),
+  birthDate: z
+    .string()
+    .trim()
+    .min(1, { message: "Data de nascimento é obrigatória." }),
+  zipCode: z.string().trim().min(1, { message: "CEP é obrigatório." }),
+  address: z.string().trim().min(1, { message: "Endereço é obrigatório." }),
+  number: z.string().trim().min(1, { message: "Número é obrigatório." }),
+  city: z.string().trim().min(1, { message: "Cidade é obrigatória." }),
+  state: z.string().trim().min(1, { message: "Estado é obrigatório." }),
+  bloodType: z.string().min(1, { message: "Tipo sanguíneo é obrigatório." }),
+  insurance: z.string().min(1, { message: "Convênio é obrigatório." }),
 });
 
 interface UpsertPatientFormProps {
@@ -71,7 +74,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
       name: patient?.name ?? "",
       email: patient?.email ?? "",
       phoneNumber: patient?.phoneNumber ?? "",
-      sex: patient?.sex ?? "male",
+      sex: patient?.sex ?? "",
       id: patient?.id,
       cpf: patient?.cpf ?? "",
       birthDate: patient?.birthDate
@@ -94,7 +97,7 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
       name: patient?.name ?? "",
       email: patient?.email ?? "",
       phoneNumber: patient?.phoneNumber ?? "",
-      sex: patient?.sex ?? "male",
+      sex: patient?.sex ?? "",
       id: patient?.id,
       cpf: patient?.cpf ?? "",
       birthDate: patient?.birthDate
@@ -213,25 +216,25 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="cpf"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CPF</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="000.000.000-00"
-                    onChange={(e) => handleCpfChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="cpf"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="000.000.000-00"
+                      onChange={(e) => handleCpfChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="birthDate"
@@ -245,7 +248,9 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
                 </FormItem>
               )}
             />
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="bloodType"
@@ -273,25 +278,24 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefone</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="(00) 00000-0000"
+                      onChange={(e) => handlePhoneChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-
-          <FormField
-            control={form.control}
-            name="phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefone</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="(00) 00000-0000"
-                    onChange={(e) => handlePhoneChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <div className="grid grid-cols-2 gap-4">
             <FormField
@@ -372,52 +376,54 @@ const UpsertPatientForm = ({ patient, onSuccess }: UpsertPatientFormProps) => {
             />
           </div>
 
-          <FormField
-            control={form.control}
-            name="insurance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Convênio</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clinicInsurancePlans.map((plan) => (
-                        <SelectItem key={plan.value} value={plan.value}>
-                          {plan.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="insurance"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Convênio</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clinicInsurancePlans.map((plan) => (
+                          <SelectItem key={plan.value} value={plan.value}>
+                            {plan.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="sex"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sexo</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Masculino</SelectItem>
-                      <SelectItem value="female">Feminino</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="sex"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sexo</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Masculino</SelectItem>
+                        <SelectItem value="female">Feminino</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <DialogFooter>
             <Button type="submit" disabled={upsertPatientAction.isPending}>
