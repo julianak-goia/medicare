@@ -31,12 +31,21 @@ const AppointmentsPage = async () => {
     redirect("/clinic-form");
   }
 
+  const clinicId = session.user.clinic.id;
+
   const [patients, doctors, appointments] = await Promise.all([
     db.query.patientsTable.findMany({
       where: eq(patientsTable.clinicId, session.user.clinic.id),
     }),
     db.query.doctorsTable.findMany({
       where: eq(doctorsTable.clinicId, session.user.clinic.id),
+      with: {
+        doctorsToClinics: {
+          with: {
+            clinic: true,
+          },
+        },
+      },
     }),
     db.query.appointmentsTable.findMany({
       where: eq(appointmentsTable.clinicId, session.user.clinic.id),
@@ -58,7 +67,11 @@ const AppointmentsPage = async () => {
           </PageDescription>
         </PageHeaderContent>
         <PageActions>
-          <AddAppointmentButton patients={patients} doctors={doctors} />
+          <AddAppointmentButton
+            patients={patients}
+            doctors={doctors}
+            clinicId={clinicId}
+          />
         </PageActions>
       </PageHeader>
       <PageContent>
@@ -100,6 +113,7 @@ const AppointmentsPage = async () => {
                     appointment={appointment}
                     patients={patients}
                     doctors={doctors}
+                    clinicId={clinicId}
                   />
                 ))
               )}

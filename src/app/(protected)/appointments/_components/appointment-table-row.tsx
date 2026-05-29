@@ -26,10 +26,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import {
+  appointmentsTable,
+  clinicsTable,
+  doctorsTable,
+  patientsTable,
+} from "@/db/schema";
 import { formatCurrencyInCents } from "@/helpers/currency";
 
 import UpsertAppointmentForm from "./upsert-appointment-form";
+
+type DoctorWithClinics = typeof doctorsTable.$inferSelect & {
+  doctorsToClinics: {
+    clinic: typeof clinicsTable.$inferSelect;
+  }[];
+};
 
 interface AppointmentTableRowProps {
   appointment: typeof appointmentsTable.$inferSelect & {
@@ -37,13 +48,15 @@ interface AppointmentTableRowProps {
     doctor: typeof doctorsTable.$inferSelect;
   };
   patients: (typeof patientsTable.$inferSelect)[];
-  doctors: (typeof doctorsTable.$inferSelect)[];
+  doctors: DoctorWithClinics[];
+  clinicId: string;
 }
 
 const AppointmentTableRow = ({
   appointment,
   patients,
   doctors,
+  clinicId,
 }: AppointmentTableRowProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -107,6 +120,7 @@ const AppointmentTableRow = ({
                 appointment={appointment}
                 doctors={doctors}
                 patients={patients}
+                clinicId={clinicId}
                 onSuccess={() => setIsEditDialogOpen(false)}
               />
 

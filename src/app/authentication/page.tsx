@@ -13,7 +13,7 @@ const AuthenticationPage = async () => {
     headers: await headers(),
   });
   if (session?.user) {
-    redirect("/dashboard");
+    redirect("/doctors");
   }
   return (
     <div className="gradient-bg flex h-screen w-screen flex-col items-center justify-center space-y-4">

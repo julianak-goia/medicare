@@ -45,7 +45,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import {
+  appointmentsTable,
+  clinicsTable,
+  doctorsTable,
+  patientsTable,
+} from "@/db/schema";
+
+type DoctorWithClinics = typeof doctorsTable.$inferSelect & {
+  doctorsToClinics: {
+    clinic: typeof clinicsTable.$inferSelect;
+  }[];
+};
 
 const formSchema = z.object({
   patientId: z.string().min(1, {
@@ -58,6 +69,10 @@ const formSchema = z.object({
 
   appointmentPrice: z.number().min(1, {
     message: "Valor da consulta é obrigatório.",
+  }),
+
+  clinicId: z.string().uuid({
+    message: "Clínica é obrigatória.",
   }),
 
   date: z.date({
@@ -74,7 +89,8 @@ type Appointment = typeof appointmentsTable.$inferSelect;
 
 interface UpsertAppointmentFormProps {
   patients: (typeof patientsTable.$inferSelect)[];
-  doctors: (typeof doctorsTable.$inferSelect)[];
+  doctors: DoctorWithClinics[];
+  clinicId: string;
   appointment?: Appointment;
   onSuccess?: () => void;
 }
@@ -82,6 +98,7 @@ interface UpsertAppointmentFormProps {
 const UpsertAppointmentForm = ({
   patients,
   doctors,
+  clinicId,
   appointment,
   onSuccess,
 }: UpsertAppointmentFormProps) => {
@@ -92,6 +109,7 @@ const UpsertAppointmentForm = ({
     defaultValues: {
       patientId: appointment?.patientId ?? "",
       doctorId: appointment?.doctorId ?? "",
+      clinicId: appointment?.clinicId ?? clinicId,
       date: appointment?.date,
       time: appointment?.date
         ? format(appointment.date, "HH:mm:ss")
@@ -114,6 +132,15 @@ const UpsertAppointmentForm = ({
     control: form.control,
     name: "date",
   });
+  const selectedClinicId = useWatch({
+    control: form.control,
+    name: "clinicId",
+  });
+
+  const patientsForClinic = useMemo(
+    () => patients.filter((p) => p.clinicId === selectedClinicId),
+    [patients, selectedClinicId],
+  );
 
   const selectedDateString = selectedDate
     ? dayjs(selectedDate).format("YYYY-MM-DD")
@@ -121,17 +148,30 @@ const UpsertAppointmentForm = ({
 
   const { data: availableTimes } = useQuery({
     queryKey: ["available-times", selectedDateString, selectedDoctorId],
-    enabled: Boolean(selectedDateString && selectedDoctorId),
     queryFn: async () =>
       getAvailableTimes({
         date: selectedDateString!,
         doctorId: selectedDoctorId,
       }),
+    enabled: !!selectedDate && !!selectedDoctorId,
   });
 
   const selectedDoctor = useMemo(
     () => doctors.find((doctor) => doctor.id === selectedDoctorId),
     [doctors, selectedDoctorId],
+  );
+
+  const selectedDoctorClinics = useMemo(
+    () =>
+      selectedDoctor
+        ? selectedDoctor.doctorsToClinics
+            .map((doctorClinic) => doctorClinic.clinic)
+            .filter(
+              (clinic, index, clinics) =>
+                clinics.findIndex((item) => item.id === clinic.id) === index,
+            )
+        : [],
+    [selectedDoctor],
   );
 
   useEffect(() => {
@@ -142,6 +182,7 @@ const UpsertAppointmentForm = ({
     form.reset({
       patientId: appointment.patientId,
       doctorId: appointment.doctorId,
+      clinicId: appointment.clinicId,
       date: appointment.date,
       time: format(appointment.date, "HH:mm:ss"),
       appointmentPrice: appointment.appointmentPriceInCents / 100,
@@ -160,7 +201,15 @@ const UpsertAppointmentForm = ({
     }
 
     form.setValue("appointmentPrice", 0);
-  }, [form, selectedDoctor]);
+  }, [form, selectedClinicId, selectedDoctor, selectedDoctorClinics]);
+
+  useEffect(() => {
+    if (!selectedPatientId) return;
+    const exists = patientsForClinic.some((p) => p.id === selectedPatientId);
+    if (!exists) {
+      form.setValue("patientId", "");
+    }
+  }, [selectedPatientId, patientsForClinic, form]);
 
   const createAppointmentAction = useAction(createAppointment, {
     onSuccess: () => {
@@ -185,7 +234,7 @@ const UpsertAppointmentForm = ({
   const onSubmit = (values: AppointmentFormValues) => {
     const payload = {
       ...values,
-      date: values.date.toISOString(),
+      date: dayjs(values.date).format("YYYY-MM-DD"),
       time: values.time || undefined,
     };
 
@@ -246,7 +295,7 @@ const UpsertAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {patients.map((patient) => (
+                    {patientsForClinic.map((patient) => (
                       <SelectItem key={patient.id} value={patient.id}>
                         {patient.name}
                       </SelectItem>
@@ -304,6 +353,35 @@ const UpsertAppointmentForm = ({
                   prefix="R$"
                   disabled={!selectedDoctor}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clinicId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Clínica</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={!selectedDoctor}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione uma clínica" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {selectedDoctorClinics.map((clinic) => (
+                      <SelectItem key={clinic.id} value={clinic.id}>
+                        {clinic.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

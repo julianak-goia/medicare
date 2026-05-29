@@ -5,23 +5,29 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { db } from "@/db";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import {
+  appointmentsTable,
+  doctorsToClinicsTable,
+  patientsTable,
+  usersToClinicsTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
 
 import { updateAppointmentSchema } from "./schema";
 
 function mergeDateAndTime(date: string, time?: string) {
-  const appointmentDate = new Date(date);
+  // Expect `date` in YYYY-MM-DD format (no timezone). Build a local Date
+  // using the provided date parts and the provided time parts so we don't
+  // accidentally shift the time due to ISO timezone conversions.
+  const [year, month, day] = date.split("-").map(Number);
 
   if (!time) {
-    return appointmentDate;
+    return new Date(year, month - 1, day);
   }
 
   const [hours, minutes] = time.split(":").map(Number);
-  appointmentDate.setHours(hours, minutes, 0, 0);
-
-  return appointmentDate;
+  return new Date(year, month - 1, day, hours, minutes, 0, 0);
 }
 
 export const updateAppointment = actionClient
@@ -35,29 +41,36 @@ export const updateAppointment = actionClient
       throw new Error("Unauthorized");
     }
 
-    if (!session.user.clinic?.id) {
+    const clinicAccess = await db.query.usersToClinicsTable.findFirst({
+      where: and(
+        eq(usersToClinicsTable.userId, session.user.id),
+        eq(usersToClinicsTable.clinicId, parsedInput.clinicId),
+      ),
+    });
+
+    if (!clinicAccess) {
       throw new Error("Clinic not found");
     }
 
-    const [appointment, patient, doctor] = await Promise.all([
+    const [appointment, patient, doctorClinic] = await Promise.all([
       db.query.appointmentsTable.findFirst({
         where: eq(appointmentsTable.id, parsedInput.id),
       }),
       db.query.patientsTable.findFirst({
         where: and(
           eq(patientsTable.id, parsedInput.patientId),
-          eq(patientsTable.clinicId, session.user.clinic.id),
+          eq(patientsTable.clinicId, parsedInput.clinicId),
         ),
       }),
-      db.query.doctorsTable.findFirst({
+      db.query.doctorsToClinicsTable.findFirst({
         where: and(
-          eq(doctorsTable.id, parsedInput.doctorId),
-          eq(doctorsTable.clinicId, session.user.clinic.id),
+          eq(doctorsToClinicsTable.doctorId, parsedInput.doctorId),
+          eq(doctorsToClinicsTable.clinicId, parsedInput.clinicId),
         ),
       }),
     ]);
 
-    if (!appointment || appointment.clinicId !== session.user.clinic.id) {
+    if (!appointment) {
       throw new Error("Agendamento não encontrado");
     }
 
@@ -65,13 +78,14 @@ export const updateAppointment = actionClient
       throw new Error("Patient not found");
     }
 
-    if (!doctor) {
+    if (!doctorClinic) {
       throw new Error("Doctor not found");
     }
 
     await db
       .update(appointmentsTable)
       .set({
+        clinicId: parsedInput.clinicId,
         patientId: parsedInput.patientId,
         doctorId: parsedInput.doctorId,
         date: mergeDateAndTime(parsedInput.date, parsedInput.time),

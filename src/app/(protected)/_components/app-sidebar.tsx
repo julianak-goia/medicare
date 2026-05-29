@@ -27,11 +27,11 @@ import {
 import { authClient } from "@/lib/auth-client";
 
 const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
+  // {
+  //   title: "Dashboard",
+  //   url: "/dashboard",
+  //   icon: LayoutDashboard,
+  // },
   {
     title: "Agendamentos",
     url: "/appointments",
