@@ -110,7 +110,8 @@ const UpsertAppointmentForm = ({
       patientId: appointment?.patientId ?? "",
       doctorId: appointment?.doctorId ?? "",
       clinicId: appointment?.clinicId ?? clinicId,
-      date: appointment?.date,
+      // date: appointment?.date,
+      date: appointment?.date ? new Date(appointment.date) : undefined,
       time: appointment?.date
         ? format(appointment.date, "HH:mm:ss")
         : undefined,
@@ -183,7 +184,8 @@ const UpsertAppointmentForm = ({
       patientId: appointment.patientId,
       doctorId: appointment.doctorId,
       clinicId: appointment.clinicId,
-      date: appointment.date,
+      // date: appointment.date,
+      date: new Date(appointment.date),
       time: format(appointment.date, "HH:mm:ss"),
       appointmentPrice: appointment.appointmentPriceInCents / 100,
     });

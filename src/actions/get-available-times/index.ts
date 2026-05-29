@@ -54,11 +54,15 @@ export const getAvailableTimes = actionClient
       where: eq(appointmentsTable.doctorId, parsedInput.doctorId),
     });
 
+    // const appointmentsOnSelectedDate = appointments
+    //   .filter((appointment) => {
+    //     return dayjs(appointment.date).isSame(parsedInput.date, "day");
+    //   })
+    //   .map((appointment) => dayjs(appointment.date).format("HH:mm:ss"));
+
     const appointmentsOnSelectedDate = appointments
-      .filter((appointment) => {
-        return dayjs(appointment.date).isSame(parsedInput.date, "day");
-      })
-      .map((appointment) => dayjs(appointment.date).format("HH:mm:ss"));
+      .filter((appointment) => appointment.date.startsWith(parsedInput.date))
+      .map((appointment) => appointment.date.substring(11, 19)); // pega HH:mm:ss
 
     const timeSlots = generateTimeSlots();
 

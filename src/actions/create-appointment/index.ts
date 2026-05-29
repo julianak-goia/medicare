@@ -18,19 +18,17 @@ import { actionClient } from "@/lib/next-safe-action";
 import { getAvailableTimes } from "../get-available-times";
 import { createAppointmentSchema } from "./schema";
 
-function mergeDateAndTime(date: string, time?: string) {
-  // Expect `date` in YYYY-MM-DD format (no timezone). Build a local Date
-  // using the provided date parts and the provided time parts so we don't
-  // accidentally shift the time due to ISO timezone conversions.
-  const [year, month, day] = date.split("-").map(Number);
+// function mergeDateAndTime(date: string, time?: string) {
 
-  if (!time) {
-    return new Date(year, month - 1, day);
-  }
+//   const [year, month, day] = date.split("-").map(Number);
 
-  const [hours, minutes] = time.split(":").map(Number);
-  return new Date(year, month - 1, day, hours, minutes, 0, 0);
-}
+//   if (!time) {
+//     return new Date(year, month - 1, day);
+//   }
+
+//   const [hours, minutes] = time.split(":").map(Number);
+//   return new Date(year, month - 1, day, hours, minutes, 0, 0);
+// }
 
 export const createAppointment = actionClient
   .schema(createAppointmentSchema)
@@ -99,7 +97,8 @@ export const createAppointment = actionClient
       clinicId: parsedInput.clinicId,
       patientId: parsedInput.patientId,
       doctorId: parsedInput.doctorId,
-      date: mergeDateAndTime(parsedInput.date, parsedInput.time),
+      // date: mergeDateAndTime(parsedInput.date, parsedInput.time),
+      date: `${parsedInput.date}T${parsedInput.time ?? "00:00:00"}`,
       appointmentPriceInCents: Math.round(parsedInput.appointmentPrice * 100),
     });
 
