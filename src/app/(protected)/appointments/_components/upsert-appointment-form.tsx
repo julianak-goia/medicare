@@ -200,6 +200,20 @@ const UpsertAppointmentForm = ({
     createAppointmentAction.execute(payload);
   };
 
+  const isDateAvailable = (date: Date) => {
+    if (!selectedDoctorId) return false;
+    const selectedDoctor = doctors.find(
+      (doctor) => doctor.id === selectedDoctorId,
+    );
+    if (!selectedDoctor) return false;
+    const dayOfWeek = date.getDay();
+
+    return (
+      dayOfWeek >= selectedDoctor?.availableFromWeekDay &&
+      dayOfWeek <= selectedDoctor?.availableToWeekDay
+    );
+  };
+
   const isSubmitting =
     createAppointmentAction.status === "executing" ||
     updateAppointmentAction.status === "executing";
@@ -322,6 +336,9 @@ const UpsertAppointmentForm = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date() || !isDateAvailable(date)
+                      }
                     />
                   </PopoverContent>
                 </Popover>
