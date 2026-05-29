@@ -44,6 +44,7 @@ type DoctorWithClinics = typeof doctorsTable.$inferSelect & {
 
 interface AppointmentTableRowProps {
   appointment: typeof appointmentsTable.$inferSelect & {
+    clinic: typeof clinicsTable.$inferSelect;
     patient: typeof patientsTable.$inferSelect;
     doctor: typeof doctorsTable.$inferSelect;
   };
@@ -78,6 +79,12 @@ const AppointmentTableRow = ({
       <td className="px-4 py-3 font-medium">{appointment.patient.name}</td>
       <td className="text-muted-foreground px-4 py-3">
         {appointment.doctor.name}
+      </td>
+      <td className="text-muted-foreground px-4 py-3">
+        {appointment.doctor.specialty}
+      </td>
+      <td className="text-muted-foreground px-4 py-3">
+        {appointment.clinic.name}
       </td>
       <td className="text-muted-foreground px-4 py-3">
         {format(appointment.date, "dd/MM/yyyy 'às' HH:mm")}

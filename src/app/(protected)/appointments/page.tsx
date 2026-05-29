@@ -50,6 +50,7 @@ const AppointmentsPage = async () => {
     db.query.appointmentsTable.findMany({
       where: eq(appointmentsTable.clinicId, session.user.clinic.id),
       with: {
+        clinic: true,
         patient: true,
         doctor: true,
       },
@@ -86,6 +87,12 @@ const AppointmentsPage = async () => {
                   Médico
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">
+                  Especialidade
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">
+                  Clínica
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">
                   Data
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">
@@ -100,7 +107,7 @@ const AppointmentsPage = async () => {
               {appointments.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={7}
                     className="text-muted-foreground px-4 py-8 text-center"
                   >
                     Nenhum agendamento encontrado.
