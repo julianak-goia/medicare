@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import dayjs from "dayjs";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -103,6 +104,7 @@ const UpsertAppointmentForm = ({
   onSuccess,
 }: UpsertAppointmentFormProps) => {
   const isEditing = Boolean(appointment);
+  const router = useRouter();
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
@@ -162,6 +164,11 @@ const UpsertAppointmentForm = ({
     [doctors, selectedDoctorId],
   );
 
+  const selectedPatient = useMemo(
+    () => patients.find((patient) => patient.id === selectedPatientId),
+    [patients, selectedPatientId],
+  );
+
   const selectedDoctorClinics = useMemo(
     () =>
       selectedDoctor
@@ -205,17 +212,21 @@ const UpsertAppointmentForm = ({
     form.setValue("appointmentPrice", 0);
   }, [form, selectedClinicId, selectedDoctor, selectedDoctorClinics]);
 
-  useEffect(() => {
-    if (!selectedPatientId) return;
-    const exists = patientsForClinic.some((p) => p.id === selectedPatientId);
-    if (!exists) {
-      form.setValue("patientId", "");
+  const patientsForClinicWithSelection = useMemo(() => {
+    if (
+      !selectedPatient ||
+      patientsForClinic.some((patient) => patient.id === selectedPatient.id)
+    ) {
+      return patientsForClinic;
     }
-  }, [selectedPatientId, patientsForClinic, form]);
+
+    return [selectedPatient, ...patientsForClinic];
+  }, [patientsForClinic, selectedPatient]);
 
   const createAppointmentAction = useAction(createAppointment, {
     onSuccess: () => {
       toast.success("Agendamento criado com sucesso.");
+      router.refresh();
       onSuccess?.();
     },
     onError: () => {
@@ -226,6 +237,7 @@ const UpsertAppointmentForm = ({
   const updateAppointmentAction = useAction(updateAppointment, {
     onSuccess: () => {
       toast.success("Agendamento atualizado com sucesso.");
+      router.refresh();
       onSuccess?.();
     },
     onError: () => {
@@ -297,7 +309,7 @@ const UpsertAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {patientsForClinic.map((patient) => (
+                    {patientsForClinicWithSelection.map((patient) => (
                       <SelectItem key={patient.id} value={patient.id}>
                         {patient.name}
                       </SelectItem>

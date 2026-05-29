@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { db } from "@/db";
-import { appointmentsTable } from "@/db/schema";
+import { appointmentsTable, usersToClinicsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
 
@@ -30,8 +30,19 @@ export const deleteAppointment = actionClient
       where: eq(appointmentsTable.id, parsedInput.id),
     });
 
-    if (!appointment || appointment.clinicId !== session.user.clinic.id) {
+    if (!appointment) {
       throw new Error("Agendamento não encontrado");
+    }
+
+    const clinicAccess = await db.query.usersToClinicsTable.findFirst({
+      where: and(
+        eq(usersToClinicsTable.userId, session.user.id),
+        eq(usersToClinicsTable.clinicId, appointment.clinicId),
+      ),
+    });
+
+    if (!clinicAccess) {
+      throw new Error("Clinic not found");
     }
 
     await db

@@ -57,10 +57,7 @@ export const updateAppointment = actionClient
         where: eq(appointmentsTable.id, parsedInput.id),
       }),
       db.query.patientsTable.findFirst({
-        where: and(
-          eq(patientsTable.id, parsedInput.patientId),
-          eq(patientsTable.clinicId, parsedInput.clinicId),
-        ),
+        where: eq(patientsTable.id, parsedInput.patientId),
       }),
       db.query.doctorsToClinicsTable.findFirst({
         where: and(
@@ -72,6 +69,17 @@ export const updateAppointment = actionClient
 
     if (!appointment) {
       throw new Error("Agendamento não encontrado");
+    }
+
+    const appointmentAccess = await db.query.usersToClinicsTable.findFirst({
+      where: and(
+        eq(usersToClinicsTable.userId, session.user.id),
+        eq(usersToClinicsTable.clinicId, appointment.clinicId),
+      ),
+    });
+
+    if (!appointmentAccess) {
+      throw new Error("Clinic not found");
     }
 
     if (!patient) {

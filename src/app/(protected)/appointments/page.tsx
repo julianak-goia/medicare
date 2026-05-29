@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,7 +12,12 @@ import {
   PageTitle,
 } from "@/components/ui/page-container";
 import { db } from "@/db";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import {
+  appointmentsTable,
+  doctorsTable,
+  patientsTable,
+  usersToClinicsTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import AddAppointmentButton from "./_components/add-appointment-button";
@@ -32,6 +37,12 @@ const AppointmentsPage = async () => {
   }
 
   const clinicId = session.user.clinic.id;
+  const userClinics = await db.query.usersToClinicsTable.findMany({
+    where: eq(usersToClinicsTable.userId, session.user.id),
+  });
+  const clinicIds = userClinics.map(
+    ({ clinicId: userClinicId }) => userClinicId,
+  );
 
   const [patients, doctors, appointments] = await Promise.all([
     db.query.patientsTable.findMany({
@@ -48,7 +59,10 @@ const AppointmentsPage = async () => {
       },
     }),
     db.query.appointmentsTable.findMany({
-      where: eq(appointmentsTable.clinicId, session.user.clinic.id),
+      where:
+        clinicIds.length > 0
+          ? inArray(appointmentsTable.clinicId, clinicIds)
+          : eq(appointmentsTable.clinicId, session.user.clinic.id),
       with: {
         clinic: true,
         patient: true,
