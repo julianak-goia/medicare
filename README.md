@@ -53,3 +53,9 @@ O sistema permite:
 - 🔐 Autenticação de usuários
 
 ---
+
+## Documentação de Diagramas
+
+Os diagramas de caso de uso e classe foram movidos para [docs/diagramas.md](docs/diagramas.md).
+
+---
