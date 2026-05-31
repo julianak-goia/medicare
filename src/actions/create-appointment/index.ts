@@ -70,10 +70,7 @@ export const createAppointment = actionClient
 
     const [patient, doctorClinic] = await Promise.all([
       db.query.patientsTable.findFirst({
-        where: and(
-          eq(patientsTable.id, parsedInput.patientId),
-          eq(patientsTable.clinicId, parsedInput.clinicId),
-        ),
+        where: eq(patientsTable.id, parsedInput.patientId),
       }),
       db.query.doctorsToClinicsTable.findFirst({
         where: and(

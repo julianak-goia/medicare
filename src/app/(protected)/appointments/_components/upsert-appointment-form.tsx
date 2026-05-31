@@ -60,6 +60,8 @@ type DoctorWithClinics = typeof doctorsTable.$inferSelect & {
 };
 
 const formSchema = z.object({
+  id: z.string().uuid().optional(),
+
   patientId: z.string().min(1, {
     message: "Paciente é obrigatório.",
   }),
@@ -109,6 +111,7 @@ const UpsertAppointmentForm = ({
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: appointment?.id,
       patientId: appointment?.patientId ?? "",
       doctorId: appointment?.doctorId ?? "",
       clinicId: appointment?.clinicId ?? clinicId,
@@ -188,6 +191,7 @@ const UpsertAppointmentForm = ({
     }
 
     form.reset({
+      id: appointment.id,
       patientId: appointment.patientId,
       doctorId: appointment.doctorId,
       clinicId: appointment.clinicId,
@@ -246,15 +250,17 @@ const UpsertAppointmentForm = ({
   });
 
   const onSubmit = (values: AppointmentFormValues) => {
+    const { id, ...payloadValues } = values;
+
     const payload = {
-      ...values,
-      date: dayjs(values.date).format("YYYY-MM-DD"),
-      time: values.time || undefined,
+      ...payloadValues,
+      date: dayjs(payloadValues.date).format("YYYY-MM-DD"),
+      time: payloadValues.time || undefined,
     };
 
-    if (appointment) {
+    if (id) {
       updateAppointmentAction.execute({
-        id: appointment.id,
+        id,
         ...payload,
       });
       return;
